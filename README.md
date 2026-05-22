@@ -31,7 +31,7 @@ Every 30 minutes during US market hours, Kangaroo runs a filter pipeline:
 Universe scan  →  Quality  →  Setup  →  Earnings  →  Sector  →  News  →  Blocklist  →  Alert
 ```
 
-1. **Universe scan** — fetches today's biggest decliners from Polygon.io. Only tickers down at least 4% on at least 2× their 20-day average volume are considered.
+1. **Universe scan** — fetches today's biggest decliners from the Yahoo Finance screener (via `yfinance`, no API key required). Only tickers down at least 4% on at least 2× their average volume are considered.
 
 2. **Quality filter** — drops small-caps, penny stocks, non-common-stock securities, and companies with negative TTM net income. Floor: $10B market cap, $50M average daily dollar volume.
 
@@ -54,9 +54,10 @@ Universe scan  →  Quality  →  Setup  →  Earnings  →  Sector  →  News  
 ### Prerequisites
 
 - Python 3.11 or later
-- A [Polygon.io](https://polygon.io) API key (free tier is fine for delayed data)
-- A [Finnhub](https://finnhub.io) API key (free tier)
+- A [Finnhub](https://finnhub.io) API key (free tier) — used for news headlines and article text
 - Either a [Pushbullet](https://www.pushbullet.com) access token or a [Telegram](https://core.telegram.org/bots) bot token + chat ID
+
+Market data (universe scan, price history, fundamentals) is sourced from Yahoo Finance via `yfinance` — no API key or account required.
 
 ### Install
 
@@ -79,7 +80,6 @@ cp .env.example .env
 Open `.env` and fill in your keys:
 
 ```dotenv
-POLYGON_API_KEY=your_polygon_key
 FINNHUB_API_KEY=your_finnhub_key
 
 # Pushbullet (default):
@@ -372,7 +372,7 @@ kangaroo/
     │   ├── sector.py          # sector-wide flag
     │   └── blocklist.py       # keyword safety filter (append-only)
     ├── sources/
-    │   ├── market_data.py     # Polygon.io client
+    │   ├── market_data.py     # Yahoo Finance (yfinance) client
     │   └── news.py            # Finnhub client
     ├── db/
     │   ├── schema.sql         # SQLite schema

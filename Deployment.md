@@ -191,7 +191,6 @@ nano .env           # or your preferred editor
 Fill in your API keys:
 
 ```dotenv
-POLYGON_API_KEY=your_polygon_key
 FINNHUB_API_KEY=your_finnhub_key
 
 # Pushbullet (default provider):
@@ -203,6 +202,8 @@ PUSHBULLET_TOKEN=your_pushbullet_token
 
 DB_PATH=/opt/kangaroo/kangaroo.db
 ```
+
+Market data is sourced from Yahoo Finance via `yfinance` — no API key required.
 
 **Never commit `.env`.** It is already in `.gitignore`.
 
