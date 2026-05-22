@@ -147,20 +147,20 @@ su - kangaroo
 ```bash
 # Run this on your local machine, not in the container
 rsync -av --exclude='.venv' --exclude='__pycache__' --exclude='*.db' \
-  /path/to/retail_bot/ kangaroo@192.168.1.200:/opt/kangaroo/
+  /path/to/retail_bot/ kangaroo@192.168.1.200:/opt/kangaroo/kangaroo_market/
 ```
 
 **Option B — from a git remote** (if you push the repo to a private remote):
 ```bash
 # Inside the container, as the kangaroo user
-git clone https://your-remote/kangaroo.git /opt/kangaroo
-cd /opt/kangaroo
+git clone https://your-remote/kangaroo.git /opt/kangaroo/kangaroo_market
+cd /opt/kangaroo/kangaroo_market
 ```
 
 ### Create the virtual environment and install
 
 ```bash
-cd /opt/kangaroo
+cd /opt/kangaroo/kangaroo_market
 python3 -m venv .venv
 .venv/bin/pip install --upgrade pip
 .venv/bin/pip install -e ".[dev]"
@@ -171,18 +171,18 @@ The `[dev]` extras are included so you can run the test suite from the container
 ### Initialize the database
 
 ```bash
-cd /opt/kangaroo
+cd /opt/kangaroo/kangaroo_market
 .venv/bin/python -m kangaroo.db.init
 ```
 
-This creates `kangaroo.db` in `/opt/kangaroo`. Run it any time you need to rebuild the schema — it is idempotent.
+This creates `kangaroo.db` in `/opt/kangaroo/kangaroo_market`. Run it any time you need to rebuild the schema — it is idempotent.
 
 ---
 
 ## Configure secrets
 
 ```bash
-cd /opt/kangaroo
+cd /opt/kangaroo/kangaroo_market
 cp .env.example .env
 chmod 600 .env      # owner-readable only
 nano .env           # or your preferred editor
@@ -200,7 +200,7 @@ PUSHBULLET_TOKEN=your_pushbullet_token
 # TELEGRAM_BOT_TOKEN=your_bot_token
 # TELEGRAM_CHAT_ID=your_chat_id
 
-DB_PATH=/opt/kangaroo/kangaroo.db
+DB_PATH=/opt/kangaroo/kangaroo_market/kangaroo.db
 ```
 
 Market data is sourced from Yahoo Finance via `yfinance` — no API key required.
@@ -212,7 +212,7 @@ Market data is sourced from Yahoo Finance via `yfinance` — no API key required
 Before starting the long-running services, confirm your API keys work:
 
 ```bash
-cd /opt/kangaroo
+cd /opt/kangaroo/kangaroo_market
 .venv/bin/python -m kangaroo.jobs.pipeline_run
 ```
 
@@ -236,9 +236,9 @@ Wants=network-online.target
 [Service]
 Type=simple
 User=kangaroo
-WorkingDirectory=/opt/kangaroo
-EnvironmentFile=/opt/kangaroo/.env
-ExecStart=/opt/kangaroo/.venv/bin/python -m kangaroo.scheduler
+WorkingDirectory=/opt/kangaroo/kangaroo_market
+EnvironmentFile=/opt/kangaroo/kangaroo_market/.env
+ExecStart=/opt/kangaroo/kangaroo_market/.venv/bin/python -m kangaroo.scheduler
 Restart=on-failure
 RestartSec=30
 StandardOutput=journal
@@ -262,9 +262,9 @@ Wants=network-online.target
 [Service]
 Type=simple
 User=kangaroo
-WorkingDirectory=/opt/kangaroo
-EnvironmentFile=/opt/kangaroo/.env
-ExecStart=/opt/kangaroo/.venv/bin/uvicorn kangaroo.dashboard.app:app \
+WorkingDirectory=/opt/kangaroo/kangaroo_market
+EnvironmentFile=/opt/kangaroo/kangaroo_market/.env
+ExecStart=/opt/kangaroo/kangaroo_market/.venv/bin/uvicorn kangaroo.dashboard.app:app \
           --host 127.0.0.1 --port 8000 --no-access-log
 Restart=on-failure
 RestartSec=10
@@ -376,18 +376,18 @@ For a second layer, copy just the database file daily using SQLite's online back
 
 ```bash
 # Create a backup script
-cat > /opt/kangaroo/backup_db.sh << 'EOF'
+cat > /opt/kangaroo/kangaroo_market/backup_db.sh << 'EOF'
 #!/bin/bash
 set -euo pipefail
-DEST="/opt/kangaroo/backups"
+DEST="/opt/kangaroo/kangaroo_market/backups"
 mkdir -p "$DEST"
-sqlite3 /opt/kangaroo/kangaroo.db ".backup $DEST/kangaroo_$(date +%Y%m%d).db"
+sqlite3 /opt/kangaroo/kangaroo_market/kangaroo.db ".backup $DEST/kangaroo_$(date +%Y%m%d).db"
 # Keep the last 30 daily backups
 find "$DEST" -name "kangaroo_*.db" -mtime +30 -delete
 EOF
 
-chmod +x /opt/kangaroo/backup_db.sh
-chown kangaroo: /opt/kangaroo/backup_db.sh
+chmod +x /opt/kangaroo/kangaroo_market/backup_db.sh
+chown kangaroo: /opt/kangaroo/kangaroo_market/backup_db.sh
 ```
 
 Schedule it with cron (runs as the kangaroo user):
@@ -395,7 +395,7 @@ Schedule it with cron (runs as the kangaroo user):
 ```bash
 crontab -u kangaroo -e
 # Add this line:
-0 18 * * 1-5  /opt/kangaroo/backup_db.sh
+0 18 * * 1-5  /opt/kangaroo/kangaroo_market/backup_db.sh
 ```
 
 This runs at 6pm UTC (1pm ET) on weekdays, one hour after the nightly job has finished.
@@ -459,7 +459,7 @@ journalctl -u kangaroo-scheduler -p err --since today
 
 ```bash
 su - kangaroo
-cd /opt/kangaroo
+cd /opt/kangaroo/kangaroo_market
 git pull                          # if using git
 .venv/bin/pip install -e .        # pick up any new dependencies
 exit
@@ -474,9 +474,9 @@ If `schema.sql` was modified, the simplest procedure is to re-run `init_db` (whi
 ```bash
 systemctl stop kangaroo-scheduler kangaroo-dashboard
 # Make a backup first!
-sqlite3 /opt/kangaroo/kangaroo.db ".backup /opt/kangaroo/backups/pre-migration.db"
+sqlite3 /opt/kangaroo/kangaroo_market/kangaroo.db ".backup /opt/kangaroo/kangaroo_market/backups/pre-migration.db"
 # Apply the migration
-sqlite3 /opt/kangaroo/kangaroo.db < migration.sql
+sqlite3 /opt/kangaroo/kangaroo_market/kangaroo.db < migration.sql
 systemctl start kangaroo-scheduler kangaroo-dashboard
 ```
 
@@ -515,24 +515,24 @@ No dashboard restart is needed unless dashboard-related settings changed.
 
 ```bash
 # How many alerts fired today?
-sqlite3 /opt/kangaroo/kangaroo.db \
+sqlite3 /opt/kangaroo/kangaroo_market/kangaroo.db \
   "SELECT count(*) FROM alerts WHERE timestamp_utc LIKE '$(date -u +%Y-%m-%d)%';"
 
 # What's on active ladders right now?
-sqlite3 /opt/kangaroo/kangaroo.db \
+sqlite3 /opt/kangaroo/kangaroo_market/kangaroo.db \
   "SELECT ticker, rung_count, last_alert_price, status FROM tracked_tickers WHERE status='active';"
 
 # Which tickers were filtered out today and why?
-sqlite3 /opt/kangaroo/kangaroo.db \
+sqlite3 /opt/kangaroo/kangaroo_market/kangaroo.db \
   "SELECT ticker, filter_name, filter_reason FROM filtered_out
    WHERE timestamp_utc LIKE '$(date -u +%Y-%m-%d)%'
    ORDER BY filter_name;"
 
 # Run one pipeline cycle manually (e.g. after market open to test)
-cd /opt/kangaroo && .venv/bin/python -m kangaroo.jobs.pipeline_run
+cd /opt/kangaroo/kangaroo_market && .venv/bin/python -m kangaroo.jobs.pipeline_run
 
 # Run the test suite to confirm nothing is broken after an update
-cd /opt/kangaroo && .venv/bin/pytest -q
+cd /opt/kangaroo/kangaroo_market && .venv/bin/pytest -q
 ```
 
 ---
@@ -565,7 +565,7 @@ cd /opt/kangaroo && .venv/bin/pytest -q
 ```bash
 # On the Proxmox host
 pct df 200              # check disk usage inside the container
-du -sh /opt/kangaroo/   # check app directory size
+du -sh /opt/kangaroo/kangaroo_market/   # check app directory size
 journalctl --disk-usage # check journal size
 ```
 
