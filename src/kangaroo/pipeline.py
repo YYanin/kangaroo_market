@@ -54,6 +54,11 @@ async def run_pipeline(
         return
 
     universe_candidates = apply_universe_filter(raw_decliners, settings.universe)
+    logger.info(
+        "Universe scan: %d raw decliners, %d passed universe filter",
+        len(raw_decliners),
+        len(universe_candidates),
+    )
 
     # Fetch active tracked tickers to avoid re-alerting on them via new-alert path
     active_tracked = {row["ticker"] for row in await repo.get_active_tracked_tickers(db_path)}
@@ -105,6 +110,7 @@ async def _process_new_alert(
 
     quality_result = apply_quality_filter(ticker, fundamentals, settings.quality)
     if not quality_result.passed:
+        logger.info("filtered_out %s quality: %s", ticker, quality_result.reason)
         await repo.insert_filtered_out(
             db_path,
             timestamp_utc=timestamp,
@@ -124,6 +130,7 @@ async def _process_new_alert(
 
     setup_result = apply_setup_filter(ticker, price_history, settings.setup)
     if not setup_result.passed:
+        logger.info("filtered_out %s setup: %s", ticker, setup_result.reason)
         await repo.insert_filtered_out(
             db_path,
             timestamp_utc=timestamp,
@@ -149,6 +156,7 @@ async def _process_new_alert(
         settings.earnings,
     )
     if not earnings_result.passed:
+        logger.info("filtered_out %s earnings: %s", ticker, earnings_result.reason)
         await repo.insert_filtered_out(
             db_path,
             timestamp_utc=timestamp,
@@ -185,6 +193,7 @@ async def _process_new_alert(
     # Blocklist
     blocklist_result = apply_blocklist(ticker, headlines, article_texts)
     if not blocklist_result.passed:
+        logger.info("filtered_out %s blocklist: %s", ticker, blocklist_result.reason)
         await repo.insert_filtered_out(
             db_path,
             timestamp_utc=timestamp,
