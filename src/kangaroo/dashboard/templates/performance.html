@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Performance — Kangaroo{% endblock %}
+{% block content %}
+<h1>Performance</h1>
+{% if not stats or stats.total_alerts == 0 %}
+  <p class="empty-state">No alert data yet.</p>
+{% else %}
+  <div class="card">
+    <table>
+      <tr><th>Total alerts (rung-1)</th><td>{{ stats.total_alerts }}</td></tr>
+      {% if stats.hit_rate_5d is not none %}
+      <tr><th>Hit rate (5-day positive return)</th><td>{{ stats.hit_rate_5d }}%</td></tr>
+      {% endif %}
+      {% if stats.avg_return_1d is not none %}
+      <tr><th>Avg return 1d</th><td>{{ "%+.2f"|format(stats.avg_return_1d) }}%</td></tr>
+      {% endif %}
+      {% if stats.avg_return_3d is not none %}
+      <tr><th>Avg return 3d</th><td>{{ "%+.2f"|format(stats.avg_return_3d) }}%</td></tr>
+      {% endif %}
+      {% if stats.avg_return_5d is not none %}
+      <tr><th>Avg return 5d</th><td>{{ "%+.2f"|format(stats.avg_return_5d) }}%</td></tr>
+      {% endif %}
+      {% if stats.avg_return_20d is not none %}
+      <tr><th>Avg return 20d</th><td>{{ "%+.2f"|format(stats.avg_return_20d) }}%</td></tr>
+      {% endif %}
+    </table>
+  </div>
+{% endif %}
+{% endblock %}

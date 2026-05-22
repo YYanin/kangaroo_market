@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Today — Kangaroo{% endblock %}
+{% block content %}
+<h1>Today's Alerts — {{ date }}</h1>
+{% if not alerts %}
+  <p class="empty-state">No alerts today.</p>
+{% else %}
+  {% for item in alerts %}
+  {% set a = item.alert %}
+  <div class="card">
+    <div class="card-title">
+      {{ a.ticker }}{% if a.company_name %} &mdash; {{ a.company_name }}{% endif %}
+      {% if a.sector %}<span class="badge badge-sector">{{ a.sector }}</span>{% endif %}
+    </div>
+    <table>
+      <tr><th>Time (ET)</th><td>{{ item.ts_et }}</td></tr>
+      <tr><th>Price at alert</th><td>${{ "%.2f"|format(a.price_at_alert) }}</td></tr>
+      {% if a.pct_change_day is not none %}
+      <tr><th>Day change</th><td>{{ "%+.1f"|format(a.pct_change_day) }}%</td></tr>
+      {% endif %}
+      {% if a.drawdown_from_52w_high is not none %}
+      <tr><th>Drawdown from 52w high</th><td>{{ "%.1f"|format(a.drawdown_from_52w_high) }}%</td></tr>
+      {% endif %}
+      {% if a.rsi_14 is not none %}
+      <tr><th>RSI-14</th><td>{{ "%.1f"|format(a.rsi_14) }}</td></tr>
+      {% endif %}
+      {% if a.pct_above_200dma is not none %}
+      <tr><th>vs 200-day MA</th><td>{{ "%+.1f"|format(a.pct_above_200dma) }}%</td></tr>
+      {% endif %}
+      {% if a.days_to_next_earnings is not none %}
+      <tr><th>Days to earnings</th><td>{{ a.days_to_next_earnings }}</td></tr>
+      {% endif %}
+      {% if a.flags %}
+      <tr><th>Flags</th><td>{{ a.flags }}</td></tr>
+      {% endif %}
+      <tr><th>Rung</th><td>{{ a.rung_number }}</td></tr>
+    </table>
+    {% if item.evidence %}
+    <div style="margin-top:0.75rem;">
+      <strong>Headlines:</strong>
+      <ul style="margin:0.3rem 0 0 1rem; padding:0;">
+        {% for e in item.evidence %}
+        <li>
+          {% if e.url %}<a href="{{ e.url }}" target="_blank" rel="noopener">{% endif %}
+          {{ e.headline }}
+          {% if e.url %}</a>{% endif %}
+          {% if e.source %}<small style="color:#6c757d"> &mdash; {{ e.source }}</small>{% endif %}
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+    {% endif %}
+  </div>
+  {% endfor %}
+{% endif %}
+{% endblock %}

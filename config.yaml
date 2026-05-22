@@ -1,0 +1,44 @@
+universe:
+  min_pct_drop: 4.0        # minimum % decline to be a candidate
+  min_relative_volume: 2.0  # minimum multiple of 20-day avg volume
+  max_count: 100            # cap on candidates per run
+
+quality:
+  min_market_cap: 10_000_000_000   # $10B
+  min_avg_daily_dollar_volume: 50_000_000  # $50M
+  require_positive_ttm_income: true
+  allowed_security_types:
+    - "CS"   # common stock (Polygon type codes)
+    - "Common Stock"
+
+setup:
+  min_drawdown_pct: 8.0    # must be at least 8% off 52w high
+  max_drawdown_pct: 30.0   # must be no more than 30% off 52w high
+  max_pct_below_200dma: 15.0  # must be within 15% of 200-day MA
+  max_rsi_14: 40.0         # RSI-14 must be below 40
+
+earnings:
+  blackout_days: 5         # trading days before earnings to block
+
+sector:
+  flag_threshold_pct: 1.5  # sector ETF down >= this % triggers sector_wide flag
+
+news:
+  lookback_hours: 24       # hours of news to retrieve
+  max_articles: 3          # full-text articles to fetch per ticker
+  headline_cache_ttl_minutes: 30
+  article_cache_ttl_minutes: 240
+
+ladder:
+  step_pct: 3.0                         # % further down to re-alert
+  max_rungs: 5                          # cap on re-alerts per tracked ticker
+  tracking_window_days: 10             # how long a ticker stays tracked
+  recovery_exit_pct: 4.0               # % above last alert to close as recovered
+  structural_damage_drawdown_pct: 30.0 # floor from 52w high
+  structural_damage_below_200dma_pct: 15.0
+
+notification:
+  provider: "pushbullet"  # "pushbullet" or "telegram"
+
+db:
+  path: "kangaroo.db"

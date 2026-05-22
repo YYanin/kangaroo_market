@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Kangaroo{% endblock %}</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 0; background: #f8f9fa; color: #212529; }
+    nav { background: #343a40; padding: 0.75rem 1.5rem; display: flex; gap: 1.5rem; }
+    nav a { color: #adb5bd; text-decoration: none; font-weight: 500; }
+    nav a:hover, nav a.active { color: #fff; }
+    main { padding: 1.5rem; max-width: 960px; margin: 0 auto; }
+    h1 { font-size: 1.4rem; margin-bottom: 1rem; }
+    .card { background: #fff; border: 1px solid #dee2e6; border-radius: 6px; padding: 1rem; margin-bottom: 1rem; }
+    .card-title { font-size: 1.1rem; font-weight: 600; margin-bottom: 0.4rem; }
+    .badge { display: inline-block; padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.78rem; }
+    .badge-sector { background: #e9ecef; }
+    .empty-state { color: #6c757d; font-style: italic; padding: 2rem 0; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { text-align: left; padding: 0.4rem 0.6rem; border-bottom: 1px solid #dee2e6; }
+    th { font-weight: 600; color: #495057; font-size: 0.85rem; }
+    .btn { display: inline-block; padding: 0.35rem 0.8rem; border-radius: 4px; font-size: 0.85rem;
+           cursor: pointer; border: none; text-decoration: none; }
+    .btn-close { background: #6c757d; color: #fff; }
+    .btn-close:hover { background: #495057; }
+  </style>
+</head>
+<body>
+<nav>
+  <a href="/" {% if active_page == 'today' %}class="active"{% endif %}>Today</a>
+  <a href="/ladders" {% if active_page == 'ladders' %}class="active"{% endif %}>Ladders</a>
+  <a href="/performance" {% if active_page == 'performance' %}class="active"{% endif %}>Performance</a>
+</nav>
+<main>
+  {% block content %}{% endblock %}
+</main>
+</body>
+</html>

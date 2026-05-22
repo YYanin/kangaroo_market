@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Ladders — Kangaroo{% endblock %}
+{% block content %}
+<h1>Active Ladders</h1>
+{% if not ladders %}
+  <p class="empty-state">No active ladders.</p>
+{% else %}
+  {% for item in ladders %}
+  {% set r = item.row %}
+  <div class="card">
+    <div class="card-title">{{ r.ticker }}</div>
+    <table>
+      <tr><th>First alert</th><td>{{ item.first_ts_et }}</td></tr>
+      <tr><th>Rung count</th><td>{{ r.rung_count }}</td></tr>
+      <tr><th>First alert price</th><td>${{ "%.2f"|format(r.first_alert_price) }}</td></tr>
+      <tr><th>Last alert price</th><td>${{ "%.2f"|format(r.last_alert_price) }}</td></tr>
+      <tr><th>Next rung trigger</th><td>${{ "%.2f"|format(item.next_trigger) }}</td></tr>
+    </table>
+    <form action="/ladders/{{ r.ticker }}/close" method="post" style="margin-top:0.75rem;">
+      <button type="submit" class="btn btn-close">Close ladder</button>
+    </form>
+  </div>
+  {% endfor %}
+{% endif %}
+{% endblock %}
