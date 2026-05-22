@@ -49,14 +49,13 @@ class TestConfigLoading:
 
     def test_secrets_loaded_from_env_file(self, tmp_path: Path) -> None:
         env_file = tmp_path / ".env"
-        env_file.write_text("POLYGON_API_KEY=test_key_123\n")
+        env_file.write_text("FINNHUB_API_KEY=test_finnhub_123\n")
         config_file = tmp_path / "config.yaml"
         config_file.write_text(yaml.dump({}))
 
-        # Ensure env var is not already set
-        os.environ.pop("POLYGON_API_KEY", None)
+        os.environ.pop("FINNHUB_API_KEY", None)
 
         settings = load_settings(config_path=config_file, env_file=env_file)
-        assert settings.polygon_api_key == "test_key_123"
+        assert settings.finnhub_api_key == "test_finnhub_123"
 
-        os.environ.pop("POLYGON_API_KEY", None)
+        os.environ.pop("FINNHUB_API_KEY", None)

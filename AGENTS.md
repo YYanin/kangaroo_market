@@ -27,14 +27,15 @@ If a request appears to ask for autonomous trading, broker integration, order pl
 - **Scheduling:** `apscheduler` (or a plain `asyncio` loop — either is acceptable)
 - **Database:** SQLite via `aiosqlite` or stdlib `sqlite3`. No ORM. Hand-written SQL in `db/repository.py`.
 - **Config:** `config.yaml` for tunable parameters; `.env` for secrets. Loaded with `pydantic-settings` or `python-dotenv` + manual parsing.
-- **Market data and news APIs:** Polygon.io or Finnhub.io. Wrapper modules in `src/kangaroo/sources/` abstract the specific provider — strategy code does not call HTTP libraries directly.
+- **Market data API:** Yahoo Finance via `yfinance` (no API key required). Covers universe scan, price history, fundamentals, earnings calendar, and sector ETF change. Wrapper in `src/kangaroo/sources/market_data.py` abstracts the provider — strategy code does not call yfinance directly.
+- **News API:** Finnhub.io. Wrapper in `src/kangaroo/sources/news.py`.
 - **Notifications:** Pushbullet or Telegram via their respective HTTP APIs.
 - **Local LLM (Phase 2 only):** Ollama running on the same Mac Mini. Default model: `llama3.1:8b-instruct-q4_K_M`. Accessed via Ollama's HTTP API. Do not introduce a Phase 2 dependency until Phase 1 is shipped and validated.
 - **Testing:** `pytest` with `pytest-asyncio`. No test framework other than pytest.
 - **Lint/format:** `ruff` for both. No `black`, no `isort` — `ruff` covers both.
 - **Type checking:** `mypy` in strict mode on the `src/kangaroo` package.
 
-Do not introduce additional libraries without asking. In particular: do not add SQLAlchemy, Django, Celery, Redis, RabbitMQ, Kafka, FastStream, Pydantic v1 (we use v2), pandas (only `vectorbt` uses pandas, and that's outside this codebase), or any AI/ML framework beyond the Ollama HTTP client.
+Do not introduce additional libraries without asking. In particular: do not add SQLAlchemy, Django, Celery, Redis, RabbitMQ, Kafka, FastStream, Pydantic v1 (we use v2), or any AI/ML framework beyond the Ollama HTTP client. `yfinance` uses pandas internally, but do not import pandas directly in application code — only consume plain Python values (float, str, list) from yfinance return values.
 
 ## Hardware context
 

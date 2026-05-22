@@ -26,7 +26,7 @@ async def _main() -> None:
     init_db(settings.db_path)
 
     async with aiohttp.ClientSession() as session:
-        market_data = MarketDataClient(api_key=settings.polygon_api_key, session=session)
+        market_data = MarketDataClient()
         news = NewsClient(
             api_key=settings.finnhub_api_key,
             session=session,

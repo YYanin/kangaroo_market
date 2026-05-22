@@ -98,7 +98,6 @@ class Settings:
     """Single entry point for all configuration values."""
 
     # Secrets (from .env)
-    polygon_api_key: str = ""
     finnhub_api_key: str = ""
     pushbullet_token: str = ""
     telegram_bot_token: str = ""
@@ -141,7 +140,6 @@ def load_settings(
         raw = _load_yaml(yaml_path)
 
     return Settings(
-        polygon_api_key=os.environ.get("POLYGON_API_KEY", ""),
         finnhub_api_key=os.environ.get("FINNHUB_API_KEY", ""),
         pushbullet_token=os.environ.get("PUSHBULLET_TOKEN", ""),
         telegram_bot_token=os.environ.get("TELEGRAM_BOT_TOKEN", ""),

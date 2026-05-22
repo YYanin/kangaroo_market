@@ -10,8 +10,6 @@ import asyncio
 import logging
 from datetime import UTC, date, datetime, timedelta
 
-import aiohttp
-
 from kangaroo.config import Settings, get_settings
 from kangaroo.db import repository as repo
 from kangaroo.filters._calendar import is_trading_day
@@ -104,11 +102,9 @@ async def fill_realized_returns(
 async def _main() -> None:
     settings = get_settings()
     now = datetime.now(UTC)
-
-    async with aiohttp.ClientSession() as session:
-        market_data = MarketDataClient(api_key=settings.polygon_api_key, session=session)
-        await fill_realized_returns(settings.db_path, market_data, now)
-        await expire_stale_ladders(settings.db_path, settings, now)
+    market_data = MarketDataClient()
+    await fill_realized_returns(settings.db_path, market_data, now)
+    await expire_stale_ladders(settings.db_path, settings, now)
 
 
 if __name__ == "__main__":

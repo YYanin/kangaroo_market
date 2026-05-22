@@ -54,7 +54,7 @@ async def _pipeline_job() -> None:
 
     settings = get_settings()
     async with aiohttp.ClientSession() as session:
-        market_data = MarketDataClient(api_key=settings.polygon_api_key, session=session)
+        market_data = MarketDataClient()
         news = NewsClient(
             api_key=settings.finnhub_api_key,
             session=session,
@@ -71,13 +71,12 @@ async def _pipeline_job() -> None:
 async def _nightly_job() -> None:
     settings = get_settings()
     now = datetime.now(UTC)
-    async with aiohttp.ClientSession() as session:
-        market_data = MarketDataClient(api_key=settings.polygon_api_key, session=session)
-        try:
-            await fill_realized_returns(settings.db_path, market_data, now)
-            await expire_stale_ladders(settings.db_path, settings, now)
-        except Exception:
-            logger.exception("Nightly job raised an unhandled exception")
+    market_data = MarketDataClient()
+    try:
+        await fill_realized_returns(settings.db_path, market_data, now)
+        await expire_stale_ladders(settings.db_path, settings, now)
+    except Exception:
+        logger.exception("Nightly job raised an unhandled exception")
 
 
 # ---------------------------------------------------------------------------
